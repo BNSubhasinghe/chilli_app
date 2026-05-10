@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Users · ChilliRover{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+
+<div class="section-block">
+  <div class="section-header">
+    <h3>System Users</h3>
+    <button class="btn-primary" onclick="document.getElementById('addUserModal').style.display='flex'">
+      + Add User
+    </button>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Full Name</th>
+        <th>Role</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td><strong>{{ u.username }}</strong></td>
+        <td>{{ u.get('full_name', '—') }}</td>
+        <td>
+          <span class="badge {% if u.role == 'admin' %}badge-green{% else %}badge-amber{% endif %}">
+            {{ u.role }}
+          </span>
+        </td>
+        <td>{{ u.get('created_at', '—') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal-overlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Add New User</h3>
+      <button class="modal-close" onclick="document.getElementById('addUserModal').style.display='none'">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('add_user') }}">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="full_name" placeholder="e.g. Field Technician A" />
+      </div>
+      <div class="form-group">
+        <label>Username <span class="required">*</span></label>
+        <input type="text" name="username" required placeholder="e.g. ftech_a" />
+      </div>
+      <div class="form-group">
+        <label>Password <span class="required">*</span></label>
+        <input type="password" name="password" required placeholder="Set a password" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary"
+          onclick="document.getElementById('addUserModal').style.display='none'">Cancel</button>
+        <button type="submit" class="btn-primary">Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

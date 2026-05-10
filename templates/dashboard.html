@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · ChilliRover{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ── Summary Cards ───────────────────────────────────────────────── -->
+<div class="cards-grid">
+
+  <div class="stat-card card-green">
+    <div class="stat-card-top">
+      <div class="stat-icon">📡</div>
+      <div class="stat-trend {% if anomaly_count > 0 %}trend-warn{% else %}trend-ok{% endif %}">
+        {{ anomaly_count }} anomal{{ 'y' if anomaly_count == 1 else 'ies' }}
+      </div>
+    </div>
+    <div class="stat-value">{{ total_sensor_logs }}</div>
+    <div class="stat-label">Sensor Logs Recorded</div>
+    <div class="stat-sub">Component 1 · Soil Moisture</div>
+  </div>
+
+  <div class="stat-card card-amber">
+    <div class="stat-card-top">
+      <div class="stat-icon">🔬</div>
+      <div class="stat-trend {% if disease_detected > 0 %}trend-warn{% else %}trend-ok{% endif %}">
+        {{ disease_detected }} disease{{ 's' if disease_detected != 1 else '' }}
+      </div>
+    </div>
+    <div class="stat-value">{{ disease_count }}</div>
+    <div class="stat-label">Images Classified</div>
+    <div class="stat-sub">Component 2 · EfficientNetB0</div>
+  </div>
+
+  <div class="stat-card card-brown">
+    <div class="stat-card-top">
+      <div class="stat-icon">🗺</div>
+      <div class="stat-trend trend-ok">K-Means</div>
+    </div>
+    <div class="stat-value">{{ zone_count }}</div>
+    <div class="stat-label">Field Zones Mapped</div>
+    <div class="stat-sub">Component 3 · Sentinel-2</div>
+  </div>
+
+  <div class="stat-card card-dark">
+    <div class="stat-card-top">
+      <div class="stat-icon">🧪</div>
+      <div class="stat-trend {% if soil_poor > 0 %}trend-warn{% else %}trend-ok{% endif %}">
+        {{ soil_poor }} poor
+      </div>
+    </div>
+    <div class="stat-value">{{ (recent_soil | length) }}</div>
+    <div class="stat-label">Soil Health Assessments</div>
+    <div class="stat-sub">Component 4 · LSTM + XGBoost</div>
+  </div>
+
+</div>
+
+
+<!-- ── Charts row ──────────────────────────────────────────────────── -->
+<div class="charts-row">
+
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <h3>Soil Health Distribution</h3>
+      <span class="chip">C4</span>
+    </div>
+    <canvas id="soilHealthChart" height="220"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <h3>Disease Classification</h3>
+      <span class="chip">C2</span>
+    </div>
+    <canvas id="diseaseChart" height="220"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <h3>Field Zone Coverage</h3>
+      <span class="chip">C3</span>
+    </div>
+    <canvas id="zoneChart" height="220"></canvas>
+  </div>
+
+</div>
+
+
+<!-- ── Tables row ─────────────────────────────────────────────────── -->
+<div class="tables-row">
+
+  <!-- Anomalies -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3>Recent Anomalies <span class="chip chip-red">C1</span></h3>
+    </div>
+    {% if recent_anomalies %}
+    <table class="data-table">
+      <thead>
+        <tr><th>Date</th><th>VW 30cm</th><th>VW 60cm</th><th>Temp</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for row in recent_anomalies %}
+        <tr>
+          <td>{{ row.date }}</td>
+          <td>{{ "%.3f"|format(row.VW_30cm) }}</td>
+          <td>{{ "%.3f"|format(row.VW_60cm) }}</td>
+          <td>{{ "%.1f"|format(row.T_30cm) }}°C</td>
+          <td><span class="badge badge-red">Anomaly</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="table-empty">No anomalies detected.</p>
+    {% endif %}
+  </div>
+
+  <!-- Disease logs -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3>Recent Disease Scans <span class="chip chip-amber">C2</span></h3>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Image</th><th>Prediction</th><th>Confidence</th></tr>
+      </thead>
+      <tbody>
+        {% for row in recent_diseases %}
+        <tr>
+          <td class="td-mono">{{ row.image_name }}</td>
+          <td>
+            <span class="badge {% if row.prediction == 'Healthy' %}badge-green{% else %}badge-red{% endif %}">
+              {{ row.prediction }}
+            </span>
+          </td>
+          <td>{{ "%.0f"|format(row.confidence * 100) }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+
+<!-- ── Field Zones + Soil Health ──────────────────────────────────── -->
+<div class="tables-row">
+
+  <!-- Field Zones -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3>Field Zone Summary <span class="chip">C3</span></h3>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Zone</th><th>Cluster</th><th>NDVI</th><th>NDWI</th><th>Area %</th><th>Label</th></tr>
+      </thead>
+      <tbody>
+        {% for z in zones %}
+        <tr>
+          <td><strong>{{ z.zone }}</strong></td>
+          <td class="td-center">{{ z.cluster }}</td>
+          <td>{{ "%.2f"|format(z.ndvi) }}</td>
+          <td>{{ "%.2f"|format(z.ndwi) }}</td>
+          <td>{{ z.area_pct }}%</td>
+          <td><span class="zone-label">{{ z.label }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Soil Health -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3>Soil Health Assessments <span class="chip">C4</span></h3>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr><th>N</th><th>P</th><th>K</th><th>pH</th><th>Model</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        {% for row in recent_soil %}
+        <tr>
+          <td>{{ row.nitrogen }}</td>
+          <td>{{ row.phosphorus }}</td>
+          <td>{{ row.potassium }}</td>
+          <td>{{ row.ph }}</td>
+          <td class="td-mono">{{ row.model }}</td>
+          <td>
+            <span class="badge
+              {% if row.prediction == 'Healthy' %}badge-green
+              {% elif row.prediction == 'Moderate' %}badge-amber
+              {% else %}badge-red{% endif %}">
+              {{ row.prediction }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+// ── Fetch and render charts ────────────────────────────────────────
+const COLORS = {
+  green:  "#4a7c59",
+  amber:  "#b5833a",
+  brown:  "#7a5c3f",
+  sage:   "#8fad88",
+  stone:  "#a09070",
+  dust:   "#c9b98a",
+  red:    "#8c3a2e",
+  bark:   "#5a4030",
+};
+
+// Soil Health
+fetch("/api/soil_health_dist").then(r => r.json()).then(data => {
+  const labels = Object.keys(data);
+  const values = Object.values(data);
+  const palette = [COLORS.green, COLORS.amber, COLORS.red, COLORS.stone];
+  new Chart(document.getElementById("soilHealthChart"), {
+    type: "doughnut",
+    data: { labels, datasets: [{ data: values, backgroundColor: palette, borderWidth: 2, borderColor: "#f5f1e8" }] },
+    options: { plugins: { legend: { position: "bottom", labels: { font: { size: 12 } } } }, cutout: "60%" }
+  });
+});
+
+// Disease
+fetch("/api/disease_dist").then(r => r.json()).then(data => {
+  const labels = Object.keys(data);
+  const values = Object.values(data);
+  const palette = labels.map(l => l === "Healthy" ? COLORS.green : (l === "Leaf Curl" ? COLORS.amber : COLORS.red));
+  new Chart(document.getElementById("diseaseChart"), {
+    type: "bar",
+    data: { labels, datasets: [{ data: values, backgroundColor: palette, borderRadius: 4, borderSkipped: false }] },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: "#e8e0d0" } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+});
+
+// Zones
+fetch("/api/zone_dist").then(r => r.json()).then(data => {
+  const labels = data.map(z => z.zone);
+  const values = data.map(z => z.area_pct);
+  const palette = [COLORS.green, COLORS.sage, COLORS.stone, COLORS.amber];
+  new Chart(document.getElementById("zoneChart"), {
+    type: "doughnut",
+    data: { labels, datasets: [{ data: values, backgroundColor: palette, borderWidth: 2, borderColor: "#f5f1e8" }] },
+    options: { plugins: { legend: { position: "bottom", labels: { font: { size: 12 } } } }, cutout: "55%" }
+  });
+});
+</script>
+{% endblock %}

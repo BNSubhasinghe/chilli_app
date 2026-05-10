@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login · ChilliRover Intelligence</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+</head>
+<body class="login-page">
+
+  <div class="login-split">
+
+    <!-- left panel -->
+    <div class="login-panel-left">
+      <div class="login-brand">
+        <span class="login-icon">🌶</span>
+        <h1>ChilliRover<br>Intelligence System</h1>
+        <p>Smart Chilli Crop Monitoring<br>Using an Autonomous Ground Rover</p>
+      </div>
+
+      <div class="login-components">
+        <div class="lc-item">
+          <span class="lc-badge">C1</span>
+          <div>
+            <strong>Anomaly Detection</strong>
+            <small>Random Forest · Soil Moisture Sensors</small>
+          </div>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge">C2</span>
+          <div>
+            <strong>Disease Detection</strong>
+            <small>EfficientNetB0 · Camera-Based</small>
+          </div>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge">C3</span>
+          <div>
+            <strong>Field Zone Mapping</strong>
+            <small>K-Means · Sentinel-2 Multispectral</small>
+          </div>
+        </div>
+        <div class="lc-item">
+          <span class="lc-badge">C4</span>
+          <div>
+            <strong>Soil Health Detection</strong>
+            <small>LSTM + XGBoost · NPK Sensors</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-meta">
+        <span>R26-IT-075</span>
+        <span>SLIIT · Dept. of Information Technology</span>
+      </div>
+    </div>
+
+    <!-- right panel / form -->
+    <div class="login-panel-right">
+      <div class="login-card">
+        <h2>Sign In</h2>
+        <p class="login-hint">Access the field intelligence dashboard</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for cat, msg in messages %}
+              <div class="alert alert-{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}" autocomplete="off">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required placeholder="Enter username" />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Enter password" />
+          </div>
+          <button type="submit" class="btn-primary btn-full">Sign In</button>
+        </form>
+
+        <div class="login-footer-note">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
