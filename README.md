@@ -98,6 +98,9 @@ Model evaluation (MAE, RMSE, R²)
 ## Completed Tasks
 
 Component 1 – Intelligent Navigation & Irrigation Control: Developed smart navigation, soil monitoring, and irrigation control features using sensor data.
+
 Component 2 – AI-Based Chilli Disease Detection: Implemented an AI model for chilli disease detection using deep learning and image processing.
+
 Component 3 – Field Zone Mapping & Treatment Planning: Developed GIS-based field zone mapping and treatment planning using machine learning.
+
 Component 4 – Predictive Soil Intelligence System: Built a soil prediction and risk detection system using LSTM and ARIMA models
