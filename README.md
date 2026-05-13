@@ -67,3 +67,37 @@ chilli_app/
     ├── css/main.css
     └── js/main.js
 ```
+## System Components
+
+Component 1 – Intelligent Navigation & Irrigation Control
+GNSS reliability scoring
+Soil moisture monitoring
+Water quality validation (pH, EC/TDS)
+Smart irrigation decision system
+Sensor data processing pipeline
+
+Component 2 – AI-Based Chilli Disease Detection
+EfficientNet-B0 model training
+Image preprocessing and augmentation
+Disease classification system
+Model evaluation and prediction outputs
+
+Component 3 – Field Zone Mapping & Treatment Planning
+K-Means clustering
+Zone classification (healthy/moderate/critical)
+GIS visualization using Folium & GeoPandas
+Treatment recommendation outputs
+
+Component 4 – Predictive Soil Intelligence System
+LSTM and ARIMA forecasting
+Soil sensor data processing
+Risk detection system
+Irrigation and fertilizer recommendations
+Model evaluation (MAE, RMSE, R²)
+
+## Completed Tasks
+
+Component 1 – Intelligent Navigation & Irrigation Control: Developed smart navigation, soil monitoring, and irrigation control features using sensor data.
+Component 2 – AI-Based Chilli Disease Detection: Implemented an AI model for chilli disease detection using deep learning and image processing.
+Component 3 – Field Zone Mapping & Treatment Planning: Developed GIS-based field zone mapping and treatment planning using machine learning.
+Component 4 – Predictive Soil Intelligence System: Built a soil prediction and risk detection system using LSTM and ARIMA models
